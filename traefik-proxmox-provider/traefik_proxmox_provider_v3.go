@@ -5,6 +5,7 @@ package traefik_proxmox_provider
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/NX211/traefik-proxmox-provider/provider"
 )
@@ -67,15 +68,26 @@ func (p *Provider) Init() error {
 // Provide creates and sends dynamic configuration.
 // This method signature is compatible with Traefik v3.
 func (p *Provider) Provide(ctx context.Context, cfgChan chan<- json.Marshaler) error {
+	// Check if provider is initialized to prevent nil pointer dereference
+	if p.provider == nil {
+		return errors.New("provider not initialized")
+	}
+	
+	// Forward to the inner provider
 	return p.provider.Provide(cfgChan)
 }
 
 // Stop the provider.
 func (p *Provider) Stop() error {
-	return p.provider.Stop()
+	// Check if provider exists before calling Stop to prevent nil pointer dereference
+	if p.provider != nil {
+		return p.provider.Stop()
+	}
+	return nil
 }
 
 // Load is required by Traefik v3 plugin interface
 func (p *Provider) Load() {
 	// This method is called by Traefik v3 to load the provider
+	// Implementation not required for basic functionality
 }
