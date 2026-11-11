@@ -1,4 +1,5 @@
 // Package traefik_proxmox_provider is a plugin to use a proxmox cluster as a provider for Traefik.
+// This is a compatibility version for Traefik v3.
 package traefik_proxmox_provider
 
 import (
@@ -37,6 +38,7 @@ type Provider struct {
 }
 
 // New creates a new Provider plugin.
+// This function is compatible with Traefik v3 plugin loading mechanism.
 func New(ctx context.Context, config *Config, name string) (*Provider, error) {
 	providerConfig := &provider.Config{
 		PollInterval:   config.PollInterval,
@@ -63,11 +65,17 @@ func (p *Provider) Init() error {
 }
 
 // Provide creates and sends dynamic configuration.
-func (p *Provider) Provide(cfgChan chan<- json.Marshaler) error {
+// This method signature is compatible with Traefik v3.
+func (p *Provider) Provide(ctx context.Context, cfgChan chan<- json.Marshaler) error {
 	return p.provider.Provide(cfgChan)
 }
 
 // Stop the provider.
 func (p *Provider) Stop() error {
 	return p.provider.Stop()
-} 
+}
+
+// Load is required by Traefik v3 plugin interface
+func (p *Provider) Load() {
+	// This method is called by Traefik v3 to load the provider
+}

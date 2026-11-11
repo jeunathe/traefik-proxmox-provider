@@ -1,7 +1,5 @@
 module github.com/NX211/traefik-proxmox-provider
 
-go 1.19
+go 1.21
 
-toolchain go1.25.6
-
-require github.com/traefik/genconf v0.5.2
+require github.com/traefik/genconf v0.4.0
