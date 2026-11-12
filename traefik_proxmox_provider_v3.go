@@ -67,13 +67,14 @@ func (p *Provider) Init() error {
 
 // Provide creates and sends dynamic configuration.
 // This method signature is compatible with Traefik v3.
-func (p *Provider) Provide(ctx context.Context, cfgChan chan<- json.Marshaler) error {
+// Using interface{} to avoid yaegi interpreter issues with channel types
+func (p *Provider) Provide(ctx context.Context, cfgChan chan<- interface{}) error {
 	// Check if provider is initialized to prevent nil pointer dereference
 	if p.provider == nil {
 		return errors.New("provider not initialized")
 	}
 	
-	// Forward to the inner provider
+	// Convert the channel if needed and forward to the inner provider
 	return p.provider.Provide(cfgChan)
 }
 
