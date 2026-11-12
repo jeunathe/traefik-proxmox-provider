@@ -55,11 +55,29 @@ func (p *Provider) Init() error {
 // Provide creates and sends dynamic configuration.
 // This method signature is compatible with Traefik v3.
 func (p *Provider) Provide(cfgChan chan<- json.Marshaler) error {
-	// Create a minimal empty configuration map
-	configuration := make(map[string]interface{})
+	// Create a configuration struct that implements json.Marshaler
+	type Configuration struct {
+		Backends map[string]*Backend `json:"backends,omitempty"`
+	}
+	
+	type Backend struct {
+		LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty"`
+	}
+	
+	type LoadBalancer struct {
+		Servers []Server `json:"servers,omitempty"`
+	}
+	
+	type Server struct {
+		Address string `json:"address,omitempty"`
+	}
+	
+	config := &Configuration{
+		Backends: make(map[string]*Backend),
+	}
 	
 	// Send the configuration
-	cfgChan <- configuration
+	cfgChan <- config
 	
 	return nil
 }
