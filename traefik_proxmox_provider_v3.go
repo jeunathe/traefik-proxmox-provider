@@ -55,11 +55,24 @@ func (p *Provider) Init() error {
 // Provide creates and sends dynamic configuration.
 // This method signature is compatible with Traefik v3.
 func (p *Provider) Provide(cfgChan chan<- json.Marshaler) error {
-	// Create a simple configuration map
-	configuration := make(map[string]interface{})
+	// Create a simple config struct that implements json.Marshaler
+	type Config struct {
+		PollInterval   string `json:"pollInterval"`
+		ApiEndpoint    string `json:"apiEndpoint"`
+		ApiTokenId     string `json:"apiTokenId"`
+		ApiToken       string `json:"apiToken"`
+		ApiLogging     string `json:"apiLogging"`
+		ApiValidateSSL string `json:"apiValidateSSL"`
+	}
+	
+	config := &Config{
+		PollInterval:   "30s",
+		ApiValidateSSL: "true",
+		ApiLogging:     "info",
+	}
 	
 	// Send the configuration
-	cfgChan <- configuration
+	cfgChan <- config
 	
 	return nil
 }
