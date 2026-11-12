@@ -5,8 +5,6 @@ package traefik_proxmox_provider
 import (
 	"context"
 	"encoding/json"
-
-	"github.com/traefik/genconf/dynamic"
 )
 
 // Config the plugin configuration.
@@ -57,13 +55,29 @@ func (p *Provider) Init() error {
 // Provide creates and sends dynamic configuration.
 // This method signature is compatible with Traefik v3.
 func (p *Provider) Provide(cfgChan chan<- json.Marshaler) error {
-	// Create a minimal configuration
-	config := &dynamic.Configuration{
-		Backends: make(map[string]*dynamic.Backend),
+	// Create a minimal empty configuration
+	type Configuration struct {
+		Backends map[string]*Backend `json:"backends,omitempty"`
+	}
+	
+	type Backend struct {
+		LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty"`
+	}
+	
+	type LoadBalancer struct {
+		Servers []Server `json:"servers,omitempty"`
+	}
+	
+	type Server struct {
+		Address string `json:"address,omitempty"`
+	}
+	
+	config := &Configuration{
+		Backends: make(map[string]*Backend),
 	}
 	
 	// Send the configuration
-	cfgChan <- &dynamic.JSONPayload{Configuration: config}
+	cfgChan <- config
 	
 	return nil
 }
