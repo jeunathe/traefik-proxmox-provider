@@ -1,15 +1,11 @@
 // Package traefik_proxmox_provider is a plugin to use a proxmox cluster as a provider for Traefik.
-// This is a compatibility version for Traefik v3.
+// This is a compatibility version for Traefik v3 that implements a minimal standalone provider.
 package traefik_proxmox_provider
 
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"time"
 
-	"github.com/jeunathe/traefik-proxmox-provider/internal"
-	"github.com/jeunathe/traefik-proxmox-provider/provider"
 	"github.com/traefik/genconf/dynamic"
 )
 
@@ -25,36 +21,31 @@ type Config struct {
 
 // CreateConfig creates the default plugin configuration.
 func CreateConfig() *Config {
-	cfg := provider.CreateConfig()
 	return &Config{
-		PollInterval:   cfg.PollInterval,
-		ApiEndpoint:    cfg.ApiEndpoint,
-		ApiTokenId:     cfg.ApiTokenId,
-		ApiToken:       cfg.ApiToken,
-		ApiLogging:     cfg.ApiLogging,
-		ApiValidateSSL: cfg.ApiValidateSSL,
+		PollInterval:   "30s",
+		ApiValidateSSL: "true",
+		ApiLogging:     "info",
 	}
 }
 
 // Provider a plugin.
 type Provider struct {
-	name         string
-	pollInterval time.Duration
-	cancel       func()
+	apiEndpoint    string
+	apiTokenId     string
+	apiToken       string
+	apiValidateSSL bool
+	apiLogging     string
 }
 
 // New creates a new Provider plugin.
 // This function is compatible with Traefik v3 plugin loading mechanism.
 func New(ctx context.Context, config *Config, name string) (*Provider, error) {
-	// Validate config
-	if config.ApiEndpoint == "" || config.ApiTokenId == "" || config.ApiToken == "" {
-		return nil, errors.New("missing required configuration")
-	}
-
 	return &Provider{
-		name:         name,
-		pollInterval: 30 * time.Second,
-		cancel:       func() {},
+		apiEndpoint:    config.ApiEndpoint,
+		apiTokenId:     config.ApiTokenId,
+		apiToken:       config.ApiToken,
+		apiValidateSSL: config.ApiValidateSSL == "true",
+		apiLogging:     config.ApiLogging,
 	}, nil
 }
 
@@ -66,7 +57,7 @@ func (p *Provider) Init() error {
 // Provide creates and sends dynamic configuration.
 // This method signature is compatible with Traefik v3.
 func (p *Provider) Provide(cfgChan chan<- json.Marshaler) error {
-	// Create a simple configuration for now
+	// Create a minimal configuration
 	config := &dynamic.Configuration{
 		Backends: make(map[string]*dynamic.Backend),
 	}
@@ -79,9 +70,6 @@ func (p *Provider) Provide(cfgChan chan<- json.Marshaler) error {
 
 // Stop the provider.
 func (p *Provider) Stop() error {
-	if p.cancel != nil {
-		p.cancel()
-	}
 	return nil
 }
 
