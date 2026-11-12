@@ -9,12 +9,12 @@ import (
 
 // Config the plugin configuration.
 type Config struct {
-	PollInterval   string `json:"pollInterval" yaml:"pollInterval" toml:"pollInterval"`
-	ApiEndpoint    string `json:"apiEndpoint" yaml:"apiEndpoint" toml:"apiEndpoint"`
-	ApiTokenId     string `json:"apiTokenId" yaml:"apiTokenId" toml:"apiTokenId"`
-	ApiToken       string `json:"apiToken" yaml:"apiToken" toml:"apiToken"`
-	ApiLogging     string `json:"apiLogging" yaml:"apiLogging" toml:"apiLogging"`
-	ApiValidateSSL string `json:"apiValidateSSL" yaml:"apiValidateSSL" toml:"apiValidateSSL"`
+	PollInterval   string `json:"pollInterval"`
+	ApiEndpoint    string `json:"apiEndpoint"`
+	ApiTokenId     string `json:"apiTokenId"`
+	ApiToken       string `json:"apiToken"`
+	ApiLogging     string `json:"apiLogging"`
+	ApiValidateSSL string `json:"apiValidateSSL"`
 }
 
 // CreateConfig creates the default plugin configuration.
