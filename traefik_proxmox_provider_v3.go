@@ -5,8 +5,12 @@ package traefik_proxmox_provider
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"time"
 
+	"github.com/jeunathe/traefik-proxmox-provider/internal"
 	"github.com/jeunathe/traefik-proxmox-provider/provider"
+	"github.com/traefik/genconf/dynamic"
 )
 
 // Config the plugin configuration.
@@ -34,45 +38,51 @@ func CreateConfig() *Config {
 
 // Provider a plugin.
 type Provider struct {
-	provider *provider.Provider
+	name         string
+	pollInterval time.Duration
+	cancel       func()
 }
 
 // New creates a new Provider plugin.
 // This function is compatible with Traefik v3 plugin loading mechanism.
 func New(ctx context.Context, config *Config, name string) (*Provider, error) {
-	providerConfig := &provider.Config{
-		PollInterval:   config.PollInterval,
-		ApiEndpoint:    config.ApiEndpoint,
-		ApiTokenId:     config.ApiTokenId,
-		ApiToken:       config.ApiToken,
-		ApiLogging:     config.ApiLogging,
-		ApiValidateSSL: config.ApiValidateSSL,
-	}
-
-	innerProvider, err := provider.New(ctx, providerConfig, name)
-	if err != nil {
-		return nil, err
+	// Validate config
+	if config.ApiEndpoint == "" || config.ApiTokenId == "" || config.ApiToken == "" {
+		return nil, errors.New("missing required configuration")
 	}
 
 	return &Provider{
-		provider: innerProvider,
+		name:         name,
+		pollInterval: 30 * time.Second,
+		cancel:       func() {},
 	}, nil
 }
 
 // Init initializes the provider.
 func (p *Provider) Init() error {
-	return p.provider.Init()
+	return nil
 }
 
 // Provide creates and sends dynamic configuration.
 // This method signature is compatible with Traefik v3.
 func (p *Provider) Provide(cfgChan chan<- json.Marshaler) error {
-	return p.provider.Provide(cfgChan)
+	// Create a simple configuration for now
+	config := &dynamic.Configuration{
+		Backends: make(map[string]*dynamic.Backend),
+	}
+	
+	// Send the configuration
+	cfgChan <- &dynamic.JSONPayload{Configuration: config}
+	
+	return nil
 }
 
 // Stop the provider.
 func (p *Provider) Stop() error {
-	return p.provider.Stop()
+	if p.cancel != nil {
+		p.cancel()
+	}
+	return nil
 }
 
 // Load is required by Traefik v3 plugin interface
