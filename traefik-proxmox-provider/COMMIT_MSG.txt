@@ -1,8 +1,0 @@
-fix: Make traefik-proxmox-provider compatible with Traefik v3
-
-- Update go.mod to use Go 1.21
-- Downgrade genconf from v0.5.2 to v0.4.0
-- Add context.Context parameter to Provide method
-- Add Load() method required by Traefik v3
-- Rename plugin file to traefik_proxmox_provider_v3.go
-- Add FIX_SUMMARY.md documentation
