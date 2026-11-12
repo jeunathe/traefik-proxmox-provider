@@ -8,13 +8,13 @@ import (
 	"encoding/json"
 )
 
-// Provider implements the Traefik provider interface
-type Provider struct {
-	apiEndpoint    string
-	apiTokenId     string
-	apiToken       string
-	apiValidateSSL bool
-	apiLogging     string
+// Provider implements the Traefik provider interface for Traefik v3
+type Provider struct{}
+
+// New creates a new Provider plugin.
+// This is a minimal implementation that satisfies Traefik v3's interface.
+func New(ctx context.Context, config *Config, name string) (*Provider, error) {
+	return &Provider{}, nil
 }
 
 // Config the plugin configuration.
@@ -32,29 +32,33 @@ func (c *Config) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c)
 }
 
-// New creates a new Provider plugin.
-func New(ctx context.Context, config *Config, name string) (*Provider, error) {
-	return &Provider{
-		apiEndpoint:    config.ApiEndpoint,
-		apiTokenId:     config.ApiTokenId,
-		apiToken:       config.ApiToken,
-		apiValidateSSL: config.ApiValidateSSL == "true",
-		apiLogging:     config.ApiLogging,
-	}, nil
-}
-
 // Init initializes the provider.
 func (p *Provider) Init() error {
 	return nil
 }
 
 // Provide creates and sends dynamic configuration.
+// This is a minimal implementation - can be extended later.
 func (p *Provider) Provide(cfgChan chan<- json.Marshaler) error {
-	// Create a simple configuration
-	config := &Config{
-		PollInterval:   "30s",
-		ApiValidateSSL: "true",
-		ApiLogging:     "info",
+	// Send an empty configuration to satisfy the interface
+	type Configuration struct {
+		Backends map[string]*Backend `json:"backends,omitempty"`
+	}
+	
+	type Backend struct {
+		LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty"`
+	}
+	
+	type LoadBalancer struct {
+		Servers []Server `json:"servers,omitempty"`
+	}
+	
+	type Server struct {
+		Address string `json:"address,omitempty"`
+	}
+	
+	config := &Configuration{
+		Backends: make(map[string]*Backend),
 	}
 	
 	cfgChan <- config
@@ -70,4 +74,5 @@ func (p *Provider) Stop() error {
 // Load is required by Traefik v3 plugin interface
 func (p *Provider) Load() {
 	// This method is called by Traefik v3 to load the provider
+	// Empty implementation
 }
