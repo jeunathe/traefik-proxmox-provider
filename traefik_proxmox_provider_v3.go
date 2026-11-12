@@ -17,6 +17,11 @@ type Config struct {
 	ApiValidateSSL string `json:"apiValidateSSL"`
 }
 
+// MarshalJSON implements json.Marshaler interface
+func (c *Config) MarshalJSON() ([]byte, error) {
+	return json.Marshal(c)
+}
+
 // CreateConfig creates the default plugin configuration.
 func CreateConfig() *Config {
 	return &Config{
@@ -56,15 +61,6 @@ func (p *Provider) Init() error {
 // This method signature is compatible with Traefik v3.
 func (p *Provider) Provide(cfgChan chan<- json.Marshaler) error {
 	// Create a simple config struct that implements json.Marshaler
-	type Config struct {
-		PollInterval   string `json:"pollInterval"`
-		ApiEndpoint    string `json:"apiEndpoint"`
-		ApiTokenId     string `json:"apiTokenId"`
-		ApiToken       string `json:"apiToken"`
-		ApiLogging     string `json:"apiLogging"`
-		ApiValidateSSL string `json:"apiValidateSSL"`
-	}
-	
 	config := &Config{
 		PollInterval:   "30s",
 		ApiValidateSSL: "true",
