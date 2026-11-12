@@ -21,7 +21,7 @@ type Config struct {
 	ApiValidateSSL string `json:"apiValidateSSL"`
 }
 
-// MarshalJSON implements json.Marshaler interface
+// MarshalJSON implements json.Marshaler interface for Config
 func (c *Config) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c)
 }
@@ -29,6 +29,11 @@ func (c *Config) MarshalJSON() ([]byte, error) {
 // Configuration represents the plugin's output configuration
 type Configuration struct {
 	Backends map[string]*Backend `json:"backends,omitempty"`
+}
+
+// MarshalJSON implements json.Marshaler interface for Configuration
+func (c *Configuration) MarshalJSON() ([]byte, error) {
+	return json.Marshal(c)
 }
 
 // Backend represents a backend server
