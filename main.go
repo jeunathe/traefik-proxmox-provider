@@ -11,12 +11,6 @@ import (
 // Provider implements the Traefik provider interface for Traefik v3
 type Provider struct{}
 
-// New creates a new Provider plugin.
-// This is a minimal implementation that satisfies Traefik v3's interface.
-func New(ctx context.Context, config *Config, name string) (*Provider, error) {
-	return &Provider{}, nil
-}
-
 // Config the plugin configuration.
 type Config struct {
 	PollInterval   string `json:"pollInterval"`
@@ -32,6 +26,32 @@ func (c *Config) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c)
 }
 
+// Configuration represents the plugin's output configuration
+type Configuration struct {
+	Backends map[string]*Backend `json:"backends,omitempty"`
+}
+
+// Backend represents a backend server
+type Backend struct {
+	LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty"`
+}
+
+// LoadBalancer represents a load balancer configuration
+type LoadBalancer struct {
+	Servers []Server `json:"servers,omitempty"`
+}
+
+// Server represents a server endpoint
+type Server struct {
+	Address string `json:"address,omitempty"`
+}
+
+// New creates a new Provider plugin.
+// This is a minimal implementation that satisfies Traefik v3's interface.
+func New(ctx context.Context, config *Config, name string) (*Provider, error) {
+	return &Provider{}, nil
+}
+
 // Init initializes the provider.
 func (p *Provider) Init() error {
 	return nil
@@ -40,23 +60,7 @@ func (p *Provider) Init() error {
 // Provide creates and sends dynamic configuration.
 // This is a minimal implementation - can be extended later.
 func (p *Provider) Provide(cfgChan chan<- json.Marshaler) error {
-	// Send an empty configuration to satisfy the interface
-	type Configuration struct {
-		Backends map[string]*Backend `json:"backends,omitempty"`
-	}
-	
-	type Backend struct {
-		LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty"`
-	}
-	
-	type LoadBalancer struct {
-		Servers []Server `json:"servers,omitempty"`
-	}
-	
-	type Server struct {
-		Address string `json:"address,omitempty"`
-	}
-	
+	// Create a simple configuration
 	config := &Configuration{
 		Backends: make(map[string]*Backend),
 	}
