@@ -51,6 +51,13 @@ type Server struct {
 	Address string `json:"address,omitempty"`
 }
 
+// ProviderPlugin is the interface that Traefik v3 expects for providers
+type ProviderPlugin interface {
+	Init() error
+	Provide(cfgChan chan<- json.Marshaler) error
+	Stop() error
+}
+
 // New creates a new Provider plugin.
 // This is a minimal implementation that satisfies Traefik v3's interface.
 func New(ctx context.Context, config *Config, name string) (*Provider, error) {
