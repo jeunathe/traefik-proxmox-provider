@@ -27,6 +27,11 @@ type Config struct {
 	ApiValidateSSL string `json:"apiValidateSSL"`
 }
 
+// MarshalJSON implements json.Marshaler interface
+func (c *Config) MarshalJSON() ([]byte, error) {
+	return json.Marshal(c)
+}
+
 // New creates a new Provider plugin.
 func New(ctx context.Context, config *Config, name string) (*Provider, error) {
 	return &Provider{
@@ -46,15 +51,6 @@ func (p *Provider) Init() error {
 // Provide creates and sends dynamic configuration.
 func (p *Provider) Provide(cfgChan chan<- json.Marshaler) error {
 	// Create a simple configuration
-	type Config struct {
-		PollInterval   string `json:"pollInterval"`
-		ApiEndpoint    string `json:"apiEndpoint"`
-		ApiTokenId     string `json:"apiTokenId"`
-		ApiToken       string `json:"apiToken"`
-		ApiLogging     string `json:"apiLogging"`
-		ApiValidateSSL string `json:"apiValidateSSL"`
-	}
-	
 	config := &Config{
 		PollInterval:   "30s",
 		ApiValidateSSL: "true",
